@@ -67,7 +67,7 @@ export class AuthenticationService {
         const [accessToken, refreshToken] = await Promise.all([
             this.signToken<Partial<ActiveUserData>>(user.id,
                 this.jwtConfiguration.accessTokenTtl,
-                {email: user.email}
+                {email: user.email, role: user.role, permissions: user.permissions}
             ),
             this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl, {
                 refreshTokenId
@@ -81,7 +81,7 @@ export class AuthenticationService {
     }
 
     private async signToken<T>(userID: number, expiresIn: number, payload?: T) {
-        const accessToken = await this.jwtService.signAsync({
+        return await this.jwtService.signAsync({
             sub: userID,
             ...payload
         }, {
@@ -90,7 +90,6 @@ export class AuthenticationService {
             secret: this.jwtConfiguration.secret,
             expiresIn,
         });
-        return accessToken;
     }
 
     async refreshTokens(refreshToken: RefreshTokenDto) {
